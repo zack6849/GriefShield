@@ -1,0 +1,56 @@
+name: GriefShield
+main: me.zack6849.griefshield
+version: 1.0
+author: zack6849
+website: http://dev.bukkit.org/server-mods/greifshield/
+commands:
+    griefshield:
+        description: griefshield's help and reload command
+        usage: /griefshield <argument>
+permissions:
+    griefshield.info:
+        description: permission to veiw nogrief's information
+        default: true
+    griefshield.alert:
+        description: permission to see alerts
+    griefshield.reload:
+        description: permission to reload nogrief
+    griefshield.blacklist.bypass:
+        description: permission to bypass griefshield's blacklist of items 
+    griefshield.bucket.lava.fill:
+        decription: permission to fill lava buckets.
+    griefshield.bucket.water.fill:
+        description: permission to fill water buckets.
+    griefshield.bucket.lava.use:
+        description: permission to use lava buckets.
+    griefshield.bucket.water.use:
+        description: permission to use water buckets.
+    griefshield.bucket.*:
+        description: permission to use all buckets
+        children:
+            griefshield.bucket.lava.fill: true
+            griefshield.bucket.water.fill: true
+            griefshield.bucket.water.use: true
+            griefshield.bucket.lava.use: true
+    griefshield.bucket.lava.*:
+        description: allows the full use of lava buckets
+        children:
+            griefshield.bucket.lava.use: true
+            griefshield.bucket.lava.fill: true
+    griefshield.bucket.water.*:
+        description: allows the full use of water buckets
+        children:
+            griefshield.bucket.water.use: true
+            griefshield.bucket.water.fill: true
+    griefshield.*:
+        description: allows you to bypass all griefshield protections
+        children:
+            griefshield.bucket.lava.fill: true
+            griefshield.bucket.lava.use: true
+            griefshield.bucket.water.fill: true
+            griefshield.bucket.water.use: true
+            griefshield.blacklist.bypass: true
+            griefshield.reload: true
+            griefshield.info: true
+            griefshield.alert: true
+    
