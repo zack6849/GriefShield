@@ -1,5 +1,5 @@
 name: GriefShield
-main: me.zack6849.griefshield
+main: me.zack6849.griefshield.noGrief
 version: 1.0
 author: zack6849
 website: http://dev.bukkit.org/server-mods/greifshield/

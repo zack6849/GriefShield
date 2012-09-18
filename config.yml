@@ -1,11 +1,9 @@
-#GreifShield configuration file
-#Notice: If you have a plugin that blocks the use of lava buckets
-#My plugin will not function correctly
 lava-blocked: true
 lava-fill-blocked: true
+logging: true
 water-blocked: true
 water-fill-blocked: true
 disallow-message: You can't use this item!
-blacklist:
 kick: true
 kick-message: You have been kicked for using a blocked item!
+blacklist:

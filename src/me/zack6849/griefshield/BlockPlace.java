@@ -1,7 +1,11 @@
 package me.zack6849.griefshield;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,16 +17,54 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.plugin.Plugin;
 
 public class BlockPlace implements Listener {
-	String prefix = ChatColor.YELLOW + "[" + ChatColor.GOLD + "griefshield"
+	Logger logger = new Logger(this);
+	String prefix = ChatColor.YELLOW + "[" + ChatColor.GOLD + "GriefShield"
 			+ ChatColor.YELLOW + "] " + ChatColor.GREEN;
-	Plugin plugin;
-
+	noGrief plugin;
+	boolean log = true;
 	public BlockPlace(noGrief noGrief) {
 		plugin = noGrief;
+		if(plugin != null){
+			log = plugin.getConfig().getBoolean("logging");	
+		}
 	}
+	public void logToFile(String message)
+	{
+			try
+			{
+				File dataFolder = plugin.getDataFolder();
+				if(!dataFolder.exists())
+				{
+					dataFolder.mkdir();
+				}
+
+				File saveTo = new File(plugin.getDataFolder(), "log.txt");
+				if (!saveTo.exists())
+				{
+					saveTo.createNewFile();
+				}
+
+
+				FileWriter fw = new FileWriter(saveTo, true);
+
+				PrintWriter pw = new PrintWriter(fw);
+
+				pw.println(message);
+
+				pw.flush();
+
+				pw.close();
+
+			} catch (IOException e)
+			{
+
+				e.printStackTrace();
+
+			}
+
+		}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void BlockBreak(BlockPlaceEvent event) {
@@ -34,6 +76,10 @@ public class BlockPlace implements Listener {
 		Boolean kick = plugin.getConfig().getBoolean("kick");
 		String bl = b.getTypeId() + ":" + b.getData();
 		List<String> nope = plugin.getConfig().getStringList("blacklist");
+		String tried = String.format("%s Tried to use %s (%s) in world '%s'", p.getName(), bl, b2, p.getWorld().getName());
+		String triedf = String.format("[%tD - %tT] %s", new Date(), new Date(), tried);
+		String did = String.format("%s Used %s (%s) in world '%s'", p.getName(), bl, b2, p.getWorld().getName());
+		String didf = String.format("[%tD - %tT] %s", new Date(), new Date(), did);
 		if (nope.contains(bl)) {
 			if (!p.hasPermission("griefshield.blacklist.bypass")) {
 				event.setCancelled(true);
@@ -41,6 +87,13 @@ public class BlockPlace implements Listener {
 				Bukkit.broadcast(prefix + "player " + p.getName() + " Tried to place block " + bl + " ( " + b2 + " )" + " at " + location + " in world : " + p.getWorld().getName(), "griefshield.alert");
 				if (kick) {
 					p.kickPlayer(kickmsg);
+				}
+				if(log){
+					logToFile(triedf);
+				}
+			}else{
+				if(log){
+					logToFile(didf);
 				}
 			}
 		}
@@ -54,14 +107,26 @@ public class BlockPlace implements Listener {
 		String location = bn.getX() + "," + bn.getY() + "," + bn.getZ();
 		String kickmsg = plugin.getConfig().getString("kick-message");
 		Boolean kick = plugin.getConfig().getBoolean("kick");
-		if (bn.getType().equals(Material.LAVA)|| bn.getType().equals(Material.STATIONARY_LAVA)) {
+		String tried = String.format("%s Tried to fill a lava bucket at (%s) in world '%s'", p.getName(), location, p.getWorld().getName());
+		String triedf = String.format("[%tD - %tT] %s", new Date(), new Date(), tried);
+		String did = String.format("%s Filled a lava bucket at  (%s) in world '%s'", p.getName(), location, p.getWorld().getName());
+		String didf = String.format("[%tD - %tT] %s", new Date(), new Date(), did);
+		if (bn.getType().equals(Material.LAVA) || bn.getType().equals(Material.STATIONARY_LAVA)) {
 			if (plugin.getConfig().getBoolean("lava-fill-blocked")) {
-				if (!event.getPlayer().hasPermission("griefshield.bucket.lava.fill")) {
+				if (!event.getPlayer().hasPermission(
+						"griefshield.bucket.lava.fill")) {
 					event.setCancelled(true);
-					Bukkit.broadcast(prefix + "player " + p.getName() + " Tried to get lava with a bucket at " + location + " in world : " + p.getWorld().getName(),"griefshield.alert");
+					Bukkit.broadcast(prefix + "player " + p.getName() + " Tried to get lava with a bucket at " + location + " in world : " + p.getWorld().getName(), "griefshield.alert");
 					p.sendMessage(prefix + message);
 					if (kick) {
 						p.kickPlayer(kickmsg);
+					}
+					if(log){
+						logToFile(triedf);
+					}
+				}else{
+					if(log){
+						logToFile(didf);
 					}
 				}
 			}
@@ -76,7 +141,11 @@ public class BlockPlace implements Listener {
 		Player p = event.getPlayer();
 		String kickmsg = plugin.getConfig().getString("kick-message");
 		Boolean kick = plugin.getConfig().getBoolean("kick");
-		if (bn.getType().equals(Material.WATER)|| bn.getType().equals(Material.STATIONARY_WATER)) {
+		String tried = String.format("%s Tried to fill a water bucket at  (%s) in world '%s'", p.getName(), location, p.getWorld().getName());
+		String triedf = String.format("[%tD - %tT] %s", new Date(), new Date(), tried);
+		String did = String.format("%s Filled a water bucket at (%s) in world '%s'", p.getName(), location, p.getWorld().getName());
+		String didf = String.format("[%tD - %tT] %s", new Date(), new Date(), did);
+		if (bn.getType().equals(Material.WATER) || bn.getType().equals(Material.STATIONARY_WATER)) {
 			if (plugin.getConfig().getBoolean("water-fill-blocked")) {
 				if (!event.getPlayer().hasPermission("griefshield.bucket.water.fill")) {
 					event.setCancelled(true);
@@ -84,6 +153,13 @@ public class BlockPlace implements Listener {
 					p.sendMessage(prefix + message);
 					if (kick) {
 						p.kickPlayer(kickmsg);
+					}
+					if(kick){
+						logToFile(triedf);
+					}
+				}else{
+					if(log){
+						logToFile(didf);
 					}
 				}
 			}
@@ -97,13 +173,25 @@ public class BlockPlace implements Listener {
 		String kickmsg = plugin.getConfig().getString("kick-message");
 		Boolean kick = plugin.getConfig().getBoolean("kick");
 		String location = b.getX() + "," + b.getY() + "," + b.getZ();
+		String tried = String.format("%s Tried to use a lava bucket at  (%s) in world '%s'", p, location, event.getPlayer().getName());
+		String didf = String.format("[%tD - %tT] %s",new Date(), new Date(), tried);
+		String did = String.format("%s Used a lava bucket at (%s) in world '%s'", p, location, event.getPlayer().getWorld().getName());
+		String triedf = String.format("[%tD - %tT] %s",new Date(), new Date(), did);
 		if (event.getBucket().equals(Material.LAVA_BUCKET)) {
 			if (plugin.getConfig().getBoolean("lava-blocked")) {
-				if (!event.getPlayer().hasPermission("griefshield.bucket.lava.use")) {
+				if (!event.getPlayer().hasPermission(
+						"griefshield.bucket.lava.use")) {
 					event.setCancelled(true);
 					Bukkit.broadcast(prefix + "player " + p + " Tried to use a bucket of lava at " + location + " in world " + event.getPlayer().getWorld().getName(),"griefshield.alert");
 					if (kick) {
 						event.getPlayer().kickPlayer(kickmsg);
+					}
+					if(log){
+						logToFile(triedf);
+					}
+				}else{
+					if(log){
+						logToFile(didf);
 					}
 				}
 			}
@@ -117,13 +205,26 @@ public class BlockPlace implements Listener {
 		String kickmsg = plugin.getConfig().getString("kick-message");
 		Boolean kick = plugin.getConfig().getBoolean("kick");
 		String location = b.getX() + "," + b.getY() + "," + b.getZ();
+		String tried = String.format("%s Tried to use a water bucket at  (%s) in world '%s'", p, location, event.getPlayer().getWorld().getName());
+		String triedf = String.format("[%tD - %tT] %s", new Date(), new Date(), tried);
+		String did = String.format("%s Used a water bucket at (%s) in world '%s'", p, location, event.getPlayer().getWorld());
+		String didf = String.format("[%tD - %tT] %s", new Date(), new Date(), did);
 		if (event.getBucket().equals(Material.WATER_BUCKET)) {
 			if (plugin.getConfig().getBoolean("water-blocked")) {
-				if (!event.getPlayer().hasPermission("griefshield.bucket.water.use")) {
+				if (!event.getPlayer().hasPermission(
+						"griefshield.bucket.water.use")) {
 					event.setCancelled(true);
-					Bukkit.broadcast(prefix + "player " + p + " Tried to use a bucket of water at " + location + " in world " + event.getPlayer().getWorld().getName(),"griefshield.alert");
+					Bukkit.broadcast(prefix + "player " + p + " Tried to use a bucket of water at " + location + " in world " + event.getPlayer().getWorld().getName(),
+							"griefshield.alert");
 					if (kick) {
 						event.getPlayer().kickPlayer(kickmsg);
+					}
+					if(log){
+						logToFile(triedf);
+					}
+				}else{
+					if(log){
+						logToFile(didf);
 					}
 				}
 			}
